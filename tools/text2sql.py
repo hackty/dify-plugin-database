@@ -76,42 +76,45 @@ class QueryTool(Tool):
         except json.JSONDecodeError:
             raise ValueError("Invalid JSON format for Connect Config")
         engine = create_engine(db_uri, **config_options)
-        inspector = inspect(engine)
-        dialect = engine.dialect.name
+        try:
+            inspector = inspect(engine)
+            dialect = engine.dialect.name
 
-        tables = tool_parameters.get("tables")
-        tables = tables.split(",") if tables else inspector.get_table_names()
+            tables = tool_parameters.get("tables")
+            tables = tables.split(",") if tables else inspector.get_table_names()
 
-        schema_info = {}
-        with engine.connect() as _:
+            schema_info = {}
+            with engine.connect() as _:
 
-            for table_name in tables:
-                try:
-                    columns = inspector.get_columns(table_name)
-                    schema_info[table_name] = [
-                        {
-                            "name": col["name"],
-                            "type": str(col["type"]),
-                            "nullable": col.get("nullable", True),
-                            "default": col.get("default"),
-                            "primary_key": col.get("primary_key", False),
-                        }
-                        for col in columns
-                    ]
-                except Exception as e:
-                    schema_info[table_name] = f"Error getting schema: {str(e)}"
-        prompt_messages = [
-            SystemPromptMessage(content=SYSTEM_PROMPT_TEMPLATE.format(dialect=dialect)),
-            UserPromptMessage(
-                content=USER_PROMPT_TEMPLATE.format(
-                    table_info=schema_info, query=tool_parameters.get("query")
-                )
-            ),
-        ]
+                for table_name in tables:
+                    try:
+                        columns = inspector.get_columns(table_name)
+                        schema_info[table_name] = [
+                            {
+                                "name": col["name"],
+                                "type": str(col["type"]),
+                                "nullable": col.get("nullable", True),
+                                "default": col.get("default"),
+                                "primary_key": col.get("primary_key", False),
+                            }
+                            for col in columns
+                        ]
+                    except Exception as e:
+                        schema_info[table_name] = f"Error getting schema: {str(e)}"
+            prompt_messages = [
+                SystemPromptMessage(content=SYSTEM_PROMPT_TEMPLATE.format(dialect=dialect)),
+                UserPromptMessage(
+                    content=USER_PROMPT_TEMPLATE.format(
+                        table_info=schema_info, query=tool_parameters.get("query")
+                    )
+                ),
+            ]
 
-        response = self.session.model.llm.invoke(
-            model_config=tool_parameters.get("model"),
-            prompt_messages=prompt_messages,
-            stream=False,
-        )
-        yield self.create_text_message(response.message.content)
+            response = self.session.model.llm.invoke(
+                model_config=tool_parameters.get("model"),
+                prompt_messages=prompt_messages,
+                stream=False,
+            )
+            yield self.create_text_message(response.message.content)
+        finally:
+            engine.dispose()

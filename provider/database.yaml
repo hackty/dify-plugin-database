@@ -1,11 +1,11 @@
 identity:
-  author: hjlarry
-  name: database
+  author: hjlarry_fix
+  name: database_fix
   label:
     en_US: Database
   description:
-    en_US: This tool is used to execute SQL in an existing database.
-    zh_Hans: 此工具用于在已存在的数据库中执行 SQL 查询。
+    en_US: This tool is used to execute SQL in an existing database.(Fix connection pool leak)
+    zh_Hans: 此工具用于在已存在的数据库中执行 SQL 查询。(修复连接池泄露)
   icon: icon.svg
 tools:
   - tools/sql_execute.yaml

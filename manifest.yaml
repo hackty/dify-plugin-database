@@ -1,15 +1,15 @@
-version: 0.0.6
+version: 1.0.6
 type: plugin
-author: hjlarry
-name: database
+author: hjlarry_fix
+name: database_fix
 label:
-  en_US: database
-  ja_JP: database
-  zh_Hans: database
-  pt_BR: database
+  en_US: database_fix
+  ja_JP: database_fix
+  zh_Hans: database_fix
+  pt_BR: database_fix
 description:
-  en_US: This tool is used to execute SQL and text2sql in an existing database.
-  zh_Hans: 此工具可以用来连接现有数据库，并执行SQL语句和自然语言转SQL。
+  en_US: This tool is used to execute SQL and text2sql in an existing database.（Fix connection pool leak）
+  zh_Hans: 此工具可以用来连接现有数据库，并执行SQL语句和自然语言转SQL。(修复连接池泄露)
 icon: icon.svg
 resource:
   memory: 268435456

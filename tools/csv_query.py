@@ -16,10 +16,10 @@ class CSVQueryTool(Tool):
         query = tool_parameters.get("query")
         df = pd.read_csv(io.BytesIO(file.blob))
         engine = create_engine("sqlite:///csv.db")
-        df.to_sql("csv", engine, index=False, if_exists='replace')
-        format = tool_parameters.get("format")
-        
         try:
+            df.to_sql("csv", engine, index=False, if_exists='replace')
+            format = tool_parameters.get("format")
+
             result_df = pd.read_sql_query(query, engine)
 
             if format == "json":
@@ -29,7 +29,7 @@ class CSVQueryTool(Tool):
                 markdown_table = (
                     "| " + " | ".join(result_df.columns) + " |\n" +
                     "| " + " | ".join(["---"] * len(result_df.columns)) + " |\n" +
-                    "\n".join("| " + " | ".join(str(x) for x in row) + " |" 
+                    "\n".join("| " + " | ".join(str(x) for x in row) + " |"
                             for row in result_df.values)
                 )
                 yield self.create_text_message(markdown_table)
